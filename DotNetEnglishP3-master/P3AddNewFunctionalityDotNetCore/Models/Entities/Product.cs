@@ -14,15 +14,20 @@ namespace P3AddNewFunctionalityDotNetCore.Models.Entities
         public string Description { get; set; }
         public string Details { get; set; }
 
-        [Required(ErrorMessage = "ErrorMissingName")]
+        //[Required(ErrorMessage = "ErrorMissingName")]
+        [Required]
         public string Name { get; set; }
 
-        [Required(ErrorMessage = "Price")]
-        [RegularExpression("^[0-9]*\\.?[0-9]+$", ErrorMessage = "Le champ prix doit être un nombre positif.")]
+        //[Required(ErrorMessage = "Price")]
+        //[RegularExpression("^[0-9]*\\.?[0-9]+$", ErrorMessage = "Le champ prix doit être un nombre positif.")]
+        [Required]
+        [RegularExpression("^[0-9]*\\.?[0-9]+$")]
         public double Price { get; set; }
 
-        [Required(ErrorMessage = "ErrorMissingStock")]
-        [RegularExpression("^\\d+$", ErrorMessage = "Le champ Stock doit être un entier.")]
+        //[Required(ErrorMessage = "ErrorMissingStock")]
+        //[RegularExpression("^\\d+$", ErrorMessage = "Le champ Stock doit être un entier.")]
+        [Required]
+        [RegularExpression("^\\d+$")]
         public int Quantity { get; set; }
 
         public virtual ICollection<OrderLine> OrderLine { get; set; }
