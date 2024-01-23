@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -92,7 +93,8 @@ namespace P3AddNewFunctionalityDotNetCore.Models.Services
 
         // TODO this is an example method, remove it and perform model validation using data annotations
         public List<string> CheckProductModelErrors(ProductViewModel product)
-        {
+        //public List<string> CheckProductModelErrors(Product product)
+        {/*
             List<string> modelErrors = new List<string>();
             if (product.Name == null || string.IsNullOrWhiteSpace(product.Name))
             {
@@ -129,7 +131,16 @@ namespace P3AddNewFunctionalityDotNetCore.Models.Services
                     modelErrors.Add(_localizer["StockNotGreaterThanZero"]);
             }
 
-            return modelErrors;
+            return modelErrors;*/
+            var validationResults = new List<ValidationResult>();
+            var validationContext = new ValidationContext(product);
+
+            if (!Validator.TryValidateObject(product, validationContext, validationResults, true))
+            {
+                return validationResults.Select(result => result.ErrorMessage).ToList();
+            }
+
+            return new List<string>();
         }
 
         public void SaveProduct(ProductViewModel product)
