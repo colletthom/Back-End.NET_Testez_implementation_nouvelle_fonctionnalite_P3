@@ -8,20 +8,20 @@ namespace P3AddNewFunctionalityDotNetCore.Models.ViewModels
         [BindNever]
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "ErrorMissingName")]
+        [Required(ErrorMessage = "MissingName")]
         public string Name { get; set; }
 
         public string Description { get; set; }
 
         public string Details { get; set; }
 
-        [Required(ErrorMessage = "ErrorMissingStock")]
-        [RegularExpression("^\\d+$", ErrorMessage = "Le champ Stock doit être un entier.")]
-
+        [Required(ErrorMessage = "MissingQuantity")]
+        [RegularExpression("^\\d+$", ErrorMessage = "QuantityNotAnInteger.")]
         public string Stock { get; set; }
 
-        [Required(ErrorMessage = "Price")]
-        [RegularExpression("^[0-9]*\\.?[0-9]+$", ErrorMessage = "Le champ prix doit être un nombre positif.")]
+        [Required(ErrorMessage = "MissingPrice")]
+        [RegularExpression(@"^-?[0-9]+(\,[0-9]{1,2})?$", ErrorMessage = "PriceNotANumber")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "PriceNotGretaerThanZero")]
         public string Price { get; set; }
     }
 }
