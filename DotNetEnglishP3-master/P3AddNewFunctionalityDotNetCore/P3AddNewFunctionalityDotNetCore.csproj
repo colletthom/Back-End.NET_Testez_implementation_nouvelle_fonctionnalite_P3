@@ -55,4 +55,10 @@
     <PackageReference Include="OpenCover" Version="4.7.1221" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Models\Product.fr.resx">
+      <Generator></Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

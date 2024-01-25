@@ -7,6 +7,7 @@ using P3AddNewFunctionalityDotNetCore.Models;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Xunit;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 namespace P3AddNewFunctionalityDotNetCore.Tests
 {
@@ -16,18 +17,14 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
     public class ProductServiceFixture
     {
         public IProductService ProductService { get; }
-        //private readonly IStringLocalizer<ProductService> _localizer;
 
-        //public ProductServiceFixture(IStringLocalizer<ProductService> localizer)
         public ProductServiceFixture()
         {
-
             var cart = new Mock<ICart>().Object;
             var productRepository = new Mock<IProductRepository>().Object;
             var orderRepository = new Mock<IOrderRepository>().Object;
             var _localizer = new Mock<IStringLocalizer<ProductService>>().Object;
-            //_localizer = localizer;
-
+            
             ProductService = new ProductService(cart, productRepository, orderRepository, _localizer);
         }
     }
@@ -48,11 +45,12 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
         {
             _productService = productServiceFixture.ProductService;
         }
-        /*
-        public ProductServiceTests(IProductService productService)
+
+        /*public ProductServiceTests(IProductService productService)
         {
-            _productService = productService;
+            this._productService = productService;
         }*/
+
 
         [Fact]
         [Description("je ne mets pas de nom dans le formulaire,« Veuillez saisir un nom » doit être retourné ")]
@@ -68,20 +66,36 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
                 Price = "10"
             };
 
+            ProductViewModel productWithNom = new ProductViewModel()
+            {
+                Name = "Thomas",
+                Description = "test nom vide",
+                Stock = "5",
+                Price = "10"
+            };
+
             // Act
             List<string> messageProductWithoutName = _productService.CheckProductModelErrors(productWithoutNom);
+            List<string> messageProductWithName = _productService.CheckProductModelErrors(productWithNom);
 
             // Assert
-            bool isContain = false;
+            bool isContainInWithout = false;
             for (int i = 0; i < messageProductWithoutName.Count; i++)
             {
-                if (!messageProductWithoutName[i].Contains("Veuillez saisir un nom"))
-                    isContain = true;
+                if (messageProductWithoutName[i].Contains("MissingName"))
+                    isContainInWithout = true;
             }
-            if (isContain == false)
+            if (isContainInWithout == false)
             {
                 Assert.Fail("le test ne fonctionne pas");
             }
+
+
+            for (int i = 0; i < messageProductWithName.Count; i++)
+            {
+                if (messageProductWithName[i].Contains("MissingName"))
+                    Assert.Fail("le test ne fonctionne pas");
+            }         
         }
         // TODO write test methods to ensure a correct coverage of all possibilities
     }
