@@ -43,7 +43,7 @@ namespace P3AddNewFunctionalityDotNetCore.Controllers
             List<string> modelErrors = _productService.CheckProductModelErrors(product);
 
             
-            //ModelState.Clear(); //sinon les messages d'erreurs s'affichaient en double
+            ModelState.Clear(); //sinon les messages d'erreurs s'affichaient en double
             foreach (string error in modelErrors)
             {
                 ModelState.AddModelError("", error);

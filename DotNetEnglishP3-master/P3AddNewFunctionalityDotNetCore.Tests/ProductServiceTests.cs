@@ -7,25 +7,29 @@ using P3AddNewFunctionalityDotNetCore.Models;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Xunit;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 namespace P3AddNewFunctionalityDotNetCore.Tests
 {
     [CollectionDefinition("ProductServiceCollection")]
     public class ProductServiceCollection : ICollectionFixture<ProductServiceFixture> { }
-
     public class ProductServiceFixture
     {
-        public IProductService ProductService { get; }
-
+        public IProductService ProductServiceFrench { get; }
+        public IProductService ProductServiceEnglish { get; }
         public ProductServiceFixture()
         {
             var cart = new Mock<ICart>().Object;
             var productRepository = new Mock<IProductRepository>().Object;
             var orderRepository = new Mock<IOrderRepository>().Object;
-            var _localizer = new Mock<IStringLocalizer<ProductService>>().Object;
             
-            ProductService = new ProductService(cart, productRepository, orderRepository, _localizer);
+            var _localizerFrench = new Mock<IStringLocalizer<ProductService>>().Object;
+            Mock.Get(_localizerFrench).Setup(x => x["MissingName"]).Returns(new LocalizedString("MissingName", "Veuillez saisir un nom"));
+
+            var _localizerEnglish = new Mock<IStringLocalizer<ProductService>>().Object;
+            Mock.Get(_localizerEnglish).Setup(x => x["MissingName"]).Returns(new LocalizedString("MissingName", "Please enter a name"));
+
+            ProductServiceFrench = new ProductService(cart, productRepository, orderRepository, _localizerFrench);
+            ProductServiceEnglish = new ProductService(cart, productRepository, orderRepository, _localizerEnglish);
         }
     }
 
@@ -39,26 +43,22 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
         /// returns an expected value from a particular set of parameters
         /// </summary>
 
-        private readonly IProductService _productService;
-        
+        private readonly IProductService _productServiceFrench;
+        private readonly IProductService _productServiceEnglish;
+
         public ProductServiceTests(ProductServiceFixture productServiceFixture)
         {
-            _productService = productServiceFixture.ProductService;
+            _productServiceFrench = productServiceFixture.ProductServiceFrench;
+            _productServiceEnglish = productServiceFixture.ProductServiceEnglish;
         }
-
-        /*public ProductServiceTests(IProductService productService)
-        {
-            this._productService = productService;
-        }*/
-
+     
 
         [Fact]
-        [Description("je ne mets pas de nom dans le formulaire,« Veuillez saisir un nom » doit être retourné ")]
+        [Description("je ne mets pas de nom dans le formulaire,« Veuillez saisir un nom » " +
+            "doit être retourné dans la bonne langue et si on nom est rempli il ne doit pas y avoir de message « Veuillez saisir un nom »")]
 
         public void TestNomVide()
         {
-            // Arrange
-
             ProductViewModel productWithoutNom = new ProductViewModel()
             {
                 Description = "test nom vide",
@@ -73,16 +73,18 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
                 Stock = "5",
                 Price = "10"
             };
-
+                                  
             // Act
-            List<string> messageProductWithoutName = _productService.CheckProductModelErrors(productWithoutNom);
-            List<string> messageProductWithName = _productService.CheckProductModelErrors(productWithNom);
+            List<string> messageProductWithoutNameFrench = _productServiceFrench.CheckProductModelErrors(productWithoutNom);
+            List<string> messageProductWithNameFrench = _productServiceFrench.CheckProductModelErrors(productWithNom);
+            List<string> messageProductWithoutNameEnglish = _productServiceEnglish.CheckProductModelErrors(productWithoutNom);
+            List<string> messageProductWithNameEnglish = _productServiceEnglish.CheckProductModelErrors(productWithNom);
 
-            // Assert
+            // Assert 1
             bool isContainInWithout = false;
-            for (int i = 0; i < messageProductWithoutName.Count; i++)
+            for (int i = 0; i < messageProductWithoutNameFrench.Count; i++)
             {
-                if (messageProductWithoutName[i].Contains("MissingName"))
+                if (messageProductWithoutNameFrench[i].Contains("Veuillez saisir un nom"))
                     isContainInWithout = true;
             }
             if (isContainInWithout == false)
@@ -90,12 +92,31 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
                 Assert.Fail("le test ne fonctionne pas");
             }
 
-
-            for (int i = 0; i < messageProductWithName.Count; i++)
+            // Assert 2
+            for (int i = 0; i < messageProductWithNameFrench.Count; i++)
             {
-                if (messageProductWithName[i].Contains("MissingName"))
+                if (messageProductWithNameFrench[i].Contains("Veuillez saisir un nom"))
                     Assert.Fail("le test ne fonctionne pas");
-            }         
+            }
+
+            // Assert 3
+            isContainInWithout = false;
+            for (int i = 0; i < messageProductWithoutNameEnglish.Count; i++)
+            {
+                if (messageProductWithoutNameEnglish[i].Contains("Please enter a name"))
+                    isContainInWithout = true;
+            }
+            if (isContainInWithout == false)
+            {
+                Assert.Fail("le test ne fonctionne pas");
+            }
+
+            // Assert 4
+            for (int i = 0; i < messageProductWithNameEnglish.Count; i++)
+            {
+                if (messageProductWithNameEnglish[i].Contains("Please enter a name"))
+                    Assert.Fail("le test ne fonctionne pas");
+            }
         }
         // TODO write test methods to ensure a correct coverage of all possibilities
     }
