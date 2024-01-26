@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Localization;
 using P3AddNewFunctionalityDotNetCore.Models.Entities;
 using P3AddNewFunctionalityDotNetCore.Models.Repositories;
@@ -137,10 +136,8 @@ namespace P3AddNewFunctionalityDotNetCore.Models.Services
 
             var validationContext = new ValidationContext(product);
             var validationResults = new List<ValidationResult>();
-          
             if (!Validator.TryValidateObject(product, validationContext, validationResults, true))
             {
-                //return validationResults.Select(result => result.ErrorMessage).ToList();
                 List<string> errors =  validationResults.Select(result => result.ErrorMessage).ToList();
                 
                 List<string> localizedErrors = new List<string>();
