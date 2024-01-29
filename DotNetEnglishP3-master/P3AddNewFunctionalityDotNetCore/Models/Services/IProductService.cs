@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using P3AddNewFunctionalityDotNetCore.Models.Entities;
+﻿using P3AddNewFunctionalityDotNetCore.Models.Entities;
 using P3AddNewFunctionalityDotNetCore.Models.ViewModels;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace P3AddNewFunctionalityDotNetCore.Models.Services
 {

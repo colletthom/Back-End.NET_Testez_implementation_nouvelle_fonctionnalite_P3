@@ -34,7 +34,7 @@ namespace P3AddNewFunctionalityDotNetCore.Models.Services
         {
             var orderToAdd = MapToOrderEntity(order);
             _orderRepository.Save(orderToAdd);
-             UpdateInventory();
+            UpdateInventory();
         }
 
         private static Order MapToOrderEntity(OrderViewModel order)

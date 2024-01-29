@@ -1,13 +1,12 @@
 ﻿using Microsoft.Extensions.Localization;
 using Moq;
+using P3AddNewFunctionalityDotNetCore.Models;
 using P3AddNewFunctionalityDotNetCore.Models.Repositories;
 using P3AddNewFunctionalityDotNetCore.Models.Services;
 using P3AddNewFunctionalityDotNetCore.Models.ViewModels;
-using P3AddNewFunctionalityDotNetCore.Models;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Xunit;
-using System.Collections;
 
 namespace P3AddNewFunctionalityDotNetCore.Tests
 {
@@ -22,7 +21,7 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
             var cart = new Mock<ICart>().Object;
             var productRepository = new Mock<IProductRepository>().Object;
             var orderRepository = new Mock<IOrderRepository>().Object;
-            
+
             var _localizerFrench = new Mock<IStringLocalizer<ProductService>>().Object;
             Mock.Get(_localizerFrench).Setup(x => x["MissingName"]).Returns(new LocalizedString("MissingName", "Veuillez saisir un nom"));
             Mock.Get(_localizerFrench).Setup(x => x["MissingPrice"]).Returns(new LocalizedString("MissingPrice", "Veuillez saisir un prix"));
@@ -64,7 +63,7 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
             _productServiceFrench = productServiceFixture.ProductServiceFrench;
             _productServiceEnglish = productServiceFixture.ProductServiceEnglish;
         }
-     
+
 
         [Fact]
         [Description("I do not put a name in the form, “Please enter a name”" +
@@ -72,6 +71,7 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
 
         public void MissingName()
         {
+            // Arrange
             ProductViewModel productWithoutNom = new ProductViewModel()
             {
                 Description = "test nom vide",
@@ -86,7 +86,7 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
                 Stock = "5",
                 Price = "10"
             };
-                                  
+
             // Act
             List<string> messageProductWithoutNameFrench = _productServiceFrench.CheckProductModelErrors(productWithoutNom);
             List<string> messageProductWithNameFrench = _productServiceFrench.CheckProductModelErrors(productWithNom);
@@ -136,11 +136,12 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
             "must be returned in the correct language and if the name is filled in there must not be a “Please enter a price” message »")]
         public void MissingPrice()
         {
+            // Arrange
             ProductViewModel productWithoutPrice = new ProductViewModel()
             {
                 Name = "Thomas",
                 Description = "test prix vide",
-                Stock = "5"                
+                Stock = "5"
             };
 
             ProductViewModel productWithPrice = new ProductViewModel()
@@ -201,6 +202,7 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
     "must be returned in the correct language and if the name is filled in there must not be a “Please enter a stock value” message »")]
         public void MissingStock()
         {
+            // Arrange
             ProductViewModel productWithoutStock = new ProductViewModel()
             {
                 Name = "Thomas",
@@ -265,6 +267,7 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
         [Description("I do not put a Price which are Not A Number in the form")]
         public void PriceNotANumber()
         {
+            // Arrange
             ProductViewModel productWithoutPriceNotANumber = new ProductViewModel()
             {
                 Name = "Thomas",
@@ -330,6 +333,7 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
         [Description("I do not put a Price which are greater than zero in the form")]
         public void PriceNotGreaterThanZero()
         {
+            // Arrange
             ProductViewModel productWithoutPriceNotGreaterThanZero = new ProductViewModel()
             {
                 Name = "Thomas",
@@ -395,6 +399,7 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
         [Description("I do not put a stock which are not an integer in the form")]
         public void StockNotAnInteger()
         {
+            // Arrange
             ProductViewModel productWithoutStockNotAnInteger = new ProductViewModel()
             {
                 Name = "Thomas",
@@ -462,6 +467,7 @@ namespace P3AddNewFunctionalityDotNetCore.Tests
         {
             ProductViewModel productWithoutStockNotGreaterThanZero = new ProductViewModel()
             {
+                // Arrange
                 Name = "Thomas",
                 Description = "test StockNotGreaterThanZero",
                 Price = "5",

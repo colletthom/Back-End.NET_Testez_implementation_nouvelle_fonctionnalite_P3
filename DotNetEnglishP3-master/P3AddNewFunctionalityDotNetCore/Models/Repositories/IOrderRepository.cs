@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using P3AddNewFunctionalityDotNetCore.Models.Entities;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using P3AddNewFunctionalityDotNetCore.Models.Entities;
 
 namespace P3AddNewFunctionalityDotNetCore.Models.Repositories
 {
