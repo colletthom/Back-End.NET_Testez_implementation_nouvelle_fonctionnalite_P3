@@ -35,7 +35,7 @@ namespace P3AddNewFunctionalityDotNetCore.Models.Services
                     culture = "en";
                     break;
             }
-            
+
             return culture;
         }
 

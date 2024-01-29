@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Microsoft.Extensions.Localization;
+using P3AddNewFunctionalityDotNetCore.Models.Entities;
+using P3AddNewFunctionalityDotNetCore.Models.Repositories;
+using P3AddNewFunctionalityDotNetCore.Models.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Localization;
-using P3AddNewFunctionalityDotNetCore.Models.Entities;
-using P3AddNewFunctionalityDotNetCore.Models.Repositories;
-using P3AddNewFunctionalityDotNetCore.Models.ViewModels;
 
 
 
@@ -30,14 +30,14 @@ namespace P3AddNewFunctionalityDotNetCore.Models.Services
         }
         public List<ProductViewModel> GetAllProductsViewModel()
         {
-             
+
             IEnumerable<Product> productEntities = GetAllProducts();
             return MapToViewModel(productEntities);
         }
 
         private static List<ProductViewModel> MapToViewModel(IEnumerable<Product> productEntities)
         {
-            List <ProductViewModel> products = new List<ProductViewModel>();
+            List<ProductViewModel> products = new List<ProductViewModel>();
             foreach (Product product in productEntities)
             {
                 products.Add(new ProductViewModel
@@ -86,7 +86,7 @@ namespace P3AddNewFunctionalityDotNetCore.Models.Services
         }
         public void UpdateProductQuantities()
         {
-            Cart cart = (Cart) _cart;
+            Cart cart = (Cart)_cart;
             foreach (CartLine line in cart.Lines)
             {
                 _productRepository.UpdateProductStocks(line.Product.Id, line.Quantity);
@@ -138,11 +138,11 @@ namespace P3AddNewFunctionalityDotNetCore.Models.Services
             var validationResults = new List<ValidationResult>();
             if (!Validator.TryValidateObject(product, validationContext, validationResults, true))
             {
-                List<string> errors =  validationResults.Select(result => result.ErrorMessage).ToList();
-                
+                List<string> errors = validationResults.Select(result => result.ErrorMessage).ToList();
+
                 List<string> localizedErrors = new List<string>();
                 foreach (string error in errors)
-                { 
+                {
                     localizedErrors.Add(_localizer[error]);
                 }
                 return localizedErrors;

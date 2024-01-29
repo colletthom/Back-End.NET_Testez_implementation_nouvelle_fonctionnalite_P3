@@ -1,8 +1,8 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using P3AddNewFunctionalityDotNetCore.Models.ViewModels;
+using System.Threading.Tasks;
 
 namespace P3AddNewFunctionalityDotNetCore.Controllers
 {
@@ -42,7 +42,7 @@ namespace P3AddNewFunctionalityDotNetCore.Controllers
                     if ((await _signInManager.PasswordSignInAsync(user,
                     loginModel.Password, false, false)).Succeeded)
                     {
-                        return Redirect(loginModel.ReturnUrl ?? "/Admin/Index");                       
+                        return Redirect(loginModel.ReturnUrl ?? "/Admin/Index");
                     }
                 }
             }

@@ -10,12 +10,10 @@ namespace P3AddNewFunctionalityDotNetCore.Controllers
     public class ProductController : Controller
     {
         private readonly IProductService _productService;
-        private readonly ILanguageService _languageService;
-        
-        public ProductController(IProductService productService, ILanguageService languageService)
+
+        public ProductController(IProductService productService)
         {
             _productService = productService;
-            _languageService = languageService;           
         }
 
         public IActionResult Index()
@@ -39,10 +37,10 @@ namespace P3AddNewFunctionalityDotNetCore.Controllers
         [Authorize]
         [HttpPost]
         public IActionResult Create(ProductViewModel product)
-        {           
+        {
             List<string> modelErrors = _productService.CheckProductModelErrors(product);
 
-            
+
             ModelState.Clear(); //sinon les messages d'erreurs s'affichaient en double
             foreach (string error in modelErrors)
             {
