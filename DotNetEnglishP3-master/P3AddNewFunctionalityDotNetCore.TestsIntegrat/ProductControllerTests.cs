@@ -18,7 +18,7 @@ namespace P3AddNewFunctionalityDotNetCore.TestsIntegrat
    
     public class ProductControllerTests
     {
-        //private const string _connectionstring = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Product; Integrated Security=True;";
+ 
         private readonly IConfiguration _configuration;
 
         public ProductControllerTests()
@@ -34,8 +34,6 @@ namespace P3AddNewFunctionalityDotNetCore.TestsIntegrat
 
         [Fact]
         [Description("J’ajoute un produit côté admin, je vérifie qu’il est présent côté utilisateur avec chacune des données valides")]
-
-        //public async Task AjoutProduitAuStock()  //passer le void en async Task
         public void AjoutProduitAuStock()
         {
             // Récupérer la chaîne de connexion depuis appsettings.json
@@ -46,20 +44,9 @@ namespace P3AddNewFunctionalityDotNetCore.TestsIntegrat
                 .UseSqlServer(connectionString)
                 .Options;
 
+            //using et ce qu'il y a dans l'accolade permet de libéré les connexions à la BDD
             using (var context = new P3Referential(options, _configuration))
             {
-                // Insertion de données de test dans la base de données
-                context.Product.Add(new Product
-                {
-                    Name = "ProductTest1",
-                    Description = "test d'intégration 1",
-                    Quantity = 1,
-                    Details = "",
-                    Price = 1.0
-                });
-
-                context.SaveChanges();
-
                 // Créer une instance du ProductService en utilisant le contexte de la base de données
                 var productService = new ProductService(null, new ProductRepository(context), null, null);
 
@@ -78,7 +65,7 @@ namespace P3AddNewFunctionalityDotNetCore.TestsIntegrat
 
                 // Assert
                 Assert.NotNull(createActionResult);
-                Assert.Equal("Admin", createActionResult.ActionName); // Vérifier la redirection vers l'action Index
+                Assert.Equal("Admin", createActionResult.ActionName); // Vérifier la redirection vers l'action Admin
 
                 // Récupérer la liste des produits après l'ajout
                 var productsAfterAdd = productService.GetAllProductsViewModel();
