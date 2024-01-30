@@ -4,12 +4,11 @@ using P3AddNewFunctionalityDotNetCore.Controllers;
 using P3AddNewFunctionalityDotNetCore.Models.Repositories;
 using P3AddNewFunctionalityDotNetCore.Models.Services;
 using P3AddNewFunctionalityDotNetCore.Models.ViewModels;
-using Microsoft.Data.SqlClient;
+using P3AddNewFunctionalityDotNetCore.Models;
 using Microsoft.EntityFrameworkCore;
 using Dapper;
 using P3AddNewFunctionalityDotNetCore.Data;
 using Microsoft.Extensions.Configuration;
-using P3AddNewFunctionalityDotNetCore.Models.Entities;
 
 
 namespace P3AddNewFunctionalityDotNetCore.TestsIntegrat
@@ -29,13 +28,15 @@ namespace P3AddNewFunctionalityDotNetCore.TestsIntegrat
             _configuration = new ConfigurationBuilder()
                 .SetBasePath(basePath)
                 .AddJsonFile("appsettings.json", optional: true)
-                .Build();
+                .Build();           
         }
 
         [Fact]
         [Description("J’ajoute un produit côté admin, je vérifie qu’il est présent côté utilisateur avec chacune des données valides")]
         public void AjoutProduitAuStock()
         {
+            //Arrange
+            var cart = new Cart();
             // Récupérer la chaîne de connexion depuis appsettings.json
             var connectionString = _configuration.GetConnectionString("P3Referential");
 
@@ -48,7 +49,7 @@ namespace P3AddNewFunctionalityDotNetCore.TestsIntegrat
             using (var context = new P3Referential(options, _configuration))
             {
                 // Créer une instance du ProductService en utilisant le contexte de la base de données
-                var productService = new ProductService(null, new ProductRepository(context), null, null);
+                var productService = new ProductService(cart, new ProductRepository(context), null, null);
 
                 // Créer une instance du ProductController en utilisant le ProductService
                 var productController = new ProductController(productService);
@@ -59,7 +60,7 @@ namespace P3AddNewFunctionalityDotNetCore.TestsIntegrat
                     Name = "ProductTest1",
                     Description = "test d'intégration 1",
                     Stock = "1",
-                    Details = "",
+                    Details = "test",
                     Price = "1"
                 }) as RedirectToActionResult;
 
@@ -75,6 +76,61 @@ namespace P3AddNewFunctionalityDotNetCore.TestsIntegrat
 
                 Assert.NotNull(addedProduct); // Vérifier que le produit ajouté est trouvé
                 Assert.Equal("ProductTest1", addedProduct.Name);
+                Assert.Equal("test d'intégration 1", addedProduct.Description);
+                Assert.Equal("1", addedProduct.Stock);
+                Assert.Equal("test", addedProduct.Details);
+                Assert.Equal("1", addedProduct.Price);
+
+                //Nettoyage du produit créé pour le test 
+                productController.DeleteProduct(addedProduct.Id);
+            }
+        }
+
+        [Fact]
+        [Description("J’ajoute un produit côté admin, je le supprime et vérifie qu’il a bien été supprimés")]
+
+        public void SuppresionProduitAuStock()
+        {
+            //Arrange
+            var cart = new Cart();
+            // Récupérer la chaîne de connexion depuis appsettings.json
+            var connectionString = _configuration.GetConnectionString("P3Referential");
+
+            // Utiliser la chaîne de connexion pour créer une instance du contexte de base de données
+            var options = new DbContextOptionsBuilder<P3Referential>()
+                .UseSqlServer(connectionString)
+                .Options;
+
+            //using et ce qu'il y a dans l'accolade permet de libéré les connexions à la BDD
+            using (var context = new P3Referential(options, _configuration))
+            {
+                // Créer une instance du ProductService en utilisant le contexte de la base de données
+                var productService = new ProductService(cart, new ProductRepository(context), null, null);
+
+                // Créer une instance du ProductController en utilisant le ProductService
+                var productController = new ProductController(productService);
+
+                // Act
+                var createActionResult = productController.Create(new ProductViewModel
+                {
+                    Name = "ProductTest2",
+                    Description = "test d'intégration 2",
+                    Stock = "2",
+                    Details = "test2",
+                    Price = "2"
+                }) as RedirectToActionResult;
+
+                // Assert
+
+                //var productsAfterAdd = productService.GetAllProductsViewModel();
+                var productsAfterAdd = productService.GetAllProducts();
+                var produitTest2 = productsAfterAdd.FirstOrDefault(p => p.Name == "ProductTest2");
+                Assert.NotNull(produitTest2);
+                productController.DeleteProduct(produitTest2.Id);
+                
+                var productsAfterDelete = productService.GetAllProducts();
+                var verifProduitTest2 = productsAfterDelete.FirstOrDefault(p => p.Name == "ProductTest2");
+                Assert.Null(verifProduitTest2);
             }
         }
     }
