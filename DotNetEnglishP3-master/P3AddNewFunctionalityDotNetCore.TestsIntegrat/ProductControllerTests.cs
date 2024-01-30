@@ -1,75 +1,35 @@
 using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Localization;
 using P3AddNewFunctionalityDotNetCore.Controllers;
 using P3AddNewFunctionalityDotNetCore.Models.Repositories;
-using P3AddNewFunctionalityDotNetCore.Models;
 using P3AddNewFunctionalityDotNetCore.Models.Services;
 using P3AddNewFunctionalityDotNetCore.Models.ViewModels;
-using P3AddNewFunctionalityDotNetCore;
-using Moq;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
-using Microsoft.AspNetCore.Mvc.Testing;
-using System.Security.Policy;
-using System;
 using Microsoft.Data.SqlClient;
-
+using Microsoft.EntityFrameworkCore;
+using Dapper;
+using P3AddNewFunctionalityDotNetCore.Data;
+using Microsoft.Extensions.Configuration;
+using P3AddNewFunctionalityDotNetCore.Models.Entities;
 
 
 namespace P3AddNewFunctionalityDotNetCore.TestsIntegrat
 {
-    [CollectionDefinition("ProductServiceCollection")]
-    public class ProductServiceCollection : ICollectionFixture<ProductServiceFixture> { }
-    public class ProductServiceFixture
-    {
-        public IProductService ProductService { get; }
-        private readonly IProductRepository _productRepository;
-        public ProductServiceFixture(IProductRepository productRepository)
-        {
-            var cart = new Mock<ICart>().Object;
-            _productRepository = productRepository;
-            var orderRepository = new Mock<IOrderRepository>().Object;
-            var _localizer = new Mock<IStringLocalizer<ProductService>>().Object;
-            //private readonly string _connectionstring = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Product;Integrated Security=True;";
-
-            ProductService = new ProductService(cart, _productRepository, orderRepository, _localizer);    
-        }
-    }
-
-   /* public class ProductViewModel
-    {
-        private readonly string _connectionstring;
-
-        public ProductViewModel(string connectionstring)
-        {
-            _connectionstring = connectionstring;
-        }
-    }*/
-
     [Collection("ProductServiceCollection")]
    
-    public class ProductControllerTests : IClassFixture<WebApplicationFactory<Program>>
+    public class ProductControllerTests
     {
-        /*[Fact]
+        //private const string _connectionstring = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Product; Integrated Security=True;";
+        private readonly IConfiguration _configuration;
 
-public async Task retourServeurHelloWorld()
-{
-    var webAppFactory = new WebApplicationFactory<Program>(); //déjà initialisé
-    var httpClient = webAppFactory.CreateDefaultClient();  //cf "var client = _factory.CreateClient();"
-
-    var response = await httpClient.GetAsync("");
-    var stringResult = await response.Content.ReadAsStringAsync();
-
-    Assert.Equal("Hello World", stringResult);
-}*/
-        private readonly IProductService _productService;
-        //private readonly WebApplicationFactory<Program> _factory;  //pour les tests d'intégration
-
-        public ProductControllerTests(ProductServiceFixture productServiceFixture)
-        //public ProductControllerTests(ProductServiceFixture productServiceFixture, WebApplicationFactory<Program> factory )
+        public ProductControllerTests()
         {
-            _productService = productServiceFixture.ProductService;
-            //_factory = factory;
+            // Configurer le chemin d'accès de base pour la recherche de appsettings.json
+            var basePath = Path.Combine(Directory.GetCurrentDirectory());
+
+            _configuration = new ConfigurationBuilder()
+                .SetBasePath(basePath)
+                .AddJsonFile("appsettings.json", optional: true)
+                .Build();
         }
 
         [Fact]
@@ -78,33 +38,57 @@ public async Task retourServeurHelloWorld()
         //public async Task AjoutProduitAuStock()  //passer le void en async Task
         public void AjoutProduitAuStock()
         {
-            //Arrange
-            //CreateClient() crée une instance de HttpClient qui suit automatiquement les redirections et gère cookie.
-            //var client = _factory.CreateClient(); 
+            // Récupérer la chaîne de connexion depuis appsettings.json
+            var connectionString = _configuration.GetConnectionString("P3Referential");
 
-            ProductViewModel productTest1 = new ProductViewModel()
+            // Utiliser la chaîne de connexion pour créer une instance du contexte de base de données
+            var options = new DbContextOptionsBuilder<P3Referential>()
+                .UseSqlServer(connectionString)
+                .Options;
+
+            using (var context = new P3Referential(options, _configuration))
             {
-                Name = "ProductTest1",
-                Description = "test d'intégration 1",
-                Stock = "1",
-                Details = "",
-                Price = "1"
-            };
+                // Insertion de données de test dans la base de données
+                context.Product.Add(new Product
+                {
+                    Name = "ProductTest1",
+                    Description = "test d'intégration 1",
+                    Quantity = 1,
+                    Details = "",
+                    Price = 1.0
+                });
 
+                context.SaveChanges();
 
-            //var connection = new SqlConnection(_connectionstring);
+                // Créer une instance du ProductService en utilisant le contexte de la base de données
+                var productService = new ProductService(null, new ProductRepository(context), null, null);
 
+                // Créer une instance du ProductController en utilisant le ProductService
+                var productController = new ProductController(productService);
 
-            //Act
-            //var response = await client.GetAsync("/"); //appeler la page d'accueil
+                // Act
+                var createActionResult = productController.Create(new ProductViewModel
+                {
+                    Name = "ProductTest1",
+                    Description = "test d'intégration 1",
+                    Stock = "1",
+                    Details = "",
+                    Price = "1"
+                }) as RedirectToActionResult;
 
-            IActionResult result = new ProductController(_productService).Create(productTest1);
-            IEnumerable<ProductViewModel> products = _productService.GetAllProductsViewModel();
+                // Assert
+                Assert.NotNull(createActionResult);
+                Assert.Equal("Admin", createActionResult.ActionName); // Vérifier la redirection vers l'action Index
 
-            //Assert
-            //var stringResult = await response.Content.ReadAsStringAsync();
-           
-            Assert.False(true);
+                // Récupérer la liste des produits après l'ajout
+                var productsAfterAdd = productService.GetAllProductsViewModel();
+
+                // Vérifier si le produit ajouté est présent dans la liste
+                var addedProduct = productsAfterAdd.FirstOrDefault(p => p.Name == "ProductTest1");
+
+                Assert.NotNull(addedProduct); // Vérifier que le produit ajouté est trouvé
+                Assert.Equal("ProductTest1", addedProduct.Name);
+            }
         }
     }
 }
