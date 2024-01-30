@@ -12,6 +12,7 @@ using Microsoft.VisualStudio.TestPlatform.TestHost;
 using Microsoft.AspNetCore.Mvc.Testing;
 using System.Security.Policy;
 using System;
+using Microsoft.Data.SqlClient;
 
 
 
@@ -22,20 +23,31 @@ namespace P3AddNewFunctionalityDotNetCore.TestsIntegrat
     public class ProductServiceFixture
     {
         public IProductService ProductService { get; }
-        public ProductServiceFixture()
+        private readonly IProductRepository _productRepository;
+        public ProductServiceFixture(IProductRepository productRepository)
         {
             var cart = new Mock<ICart>().Object;
-            var productRepository = new Mock<IProductRepository>().Object;
+            _productRepository = productRepository;
             var orderRepository = new Mock<IOrderRepository>().Object;
-            var _localizer = new Mock<IStringLocalizer<ProductService>>().Object;                
+            var _localizer = new Mock<IStringLocalizer<ProductService>>().Object;
+            //private readonly string _connectionstring = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Product;Integrated Security=True;";
 
-            ProductService = new ProductService(cart, productRepository, orderRepository, _localizer);       
+            ProductService = new ProductService(cart, _productRepository, orderRepository, _localizer);    
         }
     }
 
-    [Collection("ProductServiceCollection")]
+   /* public class ProductViewModel
+    {
+        private readonly string _connectionstring;
 
-    
+        public ProductViewModel(string connectionstring)
+        {
+            _connectionstring = connectionstring;
+        }
+    }*/
+
+    [Collection("ProductServiceCollection")]
+   
     public class ProductControllerTests : IClassFixture<WebApplicationFactory<Program>>
     {
         /*[Fact]
@@ -51,19 +63,20 @@ public async Task retourServeurHelloWorld()
     Assert.Equal("Hello World", stringResult);
 }*/
         private readonly IProductService _productService;
-        private readonly WebApplicationFactory<Program> _factory;  //pour les tests d'intégration
-        public ProductControllerTests(ProductServiceFixture productServiceFixture, WebApplicationFactory<Program> factory )
+        //private readonly WebApplicationFactory<Program> _factory;  //pour les tests d'intégration
+
+        public ProductControllerTests(ProductServiceFixture productServiceFixture)
+        //public ProductControllerTests(ProductServiceFixture productServiceFixture, WebApplicationFactory<Program> factory )
         {
             _productService = productServiceFixture.ProductService;
-            _factory = factory;
+            //_factory = factory;
         }
-
 
         [Fact]
         [Description("J’ajoute un produit côté admin, je vérifie qu’il est présent côté utilisateur avec chacune des données valides")]
 
-        public async Task AjoutProduitAuStock()  //passer le void en async Task
-        //public void AjoutProduitAuStock()
+        //public async Task AjoutProduitAuStock()  //passer le void en async Task
+        public void AjoutProduitAuStock()
         {
             //Arrange
             //CreateClient() crée une instance de HttpClient qui suit automatiquement les redirections et gère cookie.
@@ -77,6 +90,10 @@ public async Task retourServeurHelloWorld()
                 Details = "",
                 Price = "1"
             };
+
+
+            //var connection = new SqlConnection(_connectionstring);
+
 
             //Act
             //var response = await client.GetAsync("/"); //appeler la page d'accueil
