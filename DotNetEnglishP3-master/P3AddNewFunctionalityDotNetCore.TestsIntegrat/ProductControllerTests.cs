@@ -91,7 +91,7 @@ namespace P3AddNewFunctionalityDotNetCore.TestsIntegrat
         }
 
         [Fact]
-        [Description("\r\nI add a product on the admin side, I delete it and check that it has been deleted")]
+        [Description("I add a product on the admin side, I delete it and check that it has been deleted")]
 
         public void DeleteProductInStock()
         {
